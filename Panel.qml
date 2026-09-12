@@ -30,13 +30,6 @@ Panel {
 
   property bool editMode: false
 
-  readonly property var gestures: [
-    { key: "showWorkspaceSwitch", gesture: "4-finger  ←  →", action: "Switch workspace" },
-    { key: "showMinimizeAll", gesture: "4-finger  ↓  ↑", action: "Minimize all / restore" },
-    { key: "showCycleWindows", gesture: "3-finger  ←  →", action: "Cycle windows (Alt-Tab)" },
-    { key: "showAppMenu", gesture: "3-finger  ↑", action: "App menu" }
-  ]
-
   readonly property bool showInstallSection: root.boolSetting("showInstallSection", true)
   readonly property string barLabel: String(root.setting("barLabel", "Gestures"))
 
@@ -46,10 +39,6 @@ Panel {
     if (v === false || v === 0) return false
     var s = String(v).replace(/^\s+|\s+$/g, "").toLowerCase()
     return !(s === "false" || s === "0" || s === "no" || s === "off")
-  }
-
-  function gestureVisible(g) {
-    return root.boolSetting(g.key, true)
   }
 
   function persistSettings(values) {
@@ -63,10 +52,8 @@ Panel {
       root.bar.shell.updateEntryInline(root.moduleName, entry)
   }
 
-  function toggleGesture(g) {
-    var values = {}
-    values[g.key] = !root.gestureVisible(g)
-    root.persistSettings(values)
+  function toggleValue(key) {
+    return !root.boolSetting(key, true)
   }
 
   function commitBarLabel() {
@@ -75,11 +62,14 @@ Panel {
   }
 
   function resetSettings() {
-    var values = {}
-    for (var i = 0; i < root.gestures.length; i++) values[root.gestures[i].key] = true
-    values.showInstallSection = true
-    values.barLabel = "Gestures"
-    root.persistSettings(values)
+    root.persistSettings({
+      showWorkspaceSwitch: true,
+      showMinimizeAll: true,
+      showCycleWindows: true,
+      showAppMenu: true,
+      showInstallSection: true,
+      barLabel: "Gestures"
+    })
   }
 
   function openRepo() {
@@ -175,19 +165,19 @@ Panel {
       }
 
       // ---- Static rows (normal mode) -----------------------------------
-      Repeater {
-        model: root.gestures
+      Column {
         visible: !root.editMode
+        width: parent.width
+        spacing: Style.space(10)
 
         Row {
-          required property var modelData
-          width: contentColumn.width
-          visible: root.gestureVisible(modelData)
+          width: parent.width
+          visible: root.boolSetting("showWorkspaceSwitch", true)
           spacing: Style.space(14)
 
           Text {
-            width: (contentColumn.width - parent.spacing) / 2
-            text: modelData.gesture
+            width: (parent.width - parent.spacing) / 2
+            text: "4-finger  ←  →"
             color: root.contentForeground
             font.family: root.contentFontFamily
             font.pixelSize: Style.font.body
@@ -196,8 +186,83 @@ Panel {
           }
 
           Text {
-            width: (contentColumn.width - parent.spacing) / 2
-            text: modelData.action
+            width: (parent.width - parent.spacing) / 2
+            text: "Switch workspace"
+            color: Qt.darker(root.contentForeground, 1.35)
+            font.family: root.contentFontFamily
+            font.pixelSize: Style.font.body
+            wrapMode: Text.WordWrap
+          }
+        }
+
+        Row {
+          width: parent.width
+          visible: root.boolSetting("showMinimizeAll", true)
+          spacing: Style.space(14)
+
+          Text {
+            width: (parent.width - parent.spacing) / 2
+            text: "4-finger  ↓  ↑"
+            color: root.contentForeground
+            font.family: root.contentFontFamily
+            font.pixelSize: Style.font.body
+            font.bold: true
+            elide: Text.ElideRight
+          }
+
+          Text {
+            width: (parent.width - parent.spacing) / 2
+            text: "Minimize all / restore"
+            color: Qt.darker(root.contentForeground, 1.35)
+            font.family: root.contentFontFamily
+            font.pixelSize: Style.font.body
+            wrapMode: Text.WordWrap
+          }
+        }
+
+        Row {
+          width: parent.width
+          visible: root.boolSetting("showCycleWindows", true)
+          spacing: Style.space(14)
+
+          Text {
+            width: (parent.width - parent.spacing) / 2
+            text: "3-finger  ←  →"
+            color: root.contentForeground
+            font.family: root.contentFontFamily
+            font.pixelSize: Style.font.body
+            font.bold: true
+            elide: Text.ElideRight
+          }
+
+          Text {
+            width: (parent.width - parent.spacing) / 2
+            text: "Cycle windows (Alt-Tab)"
+            color: Qt.darker(root.contentForeground, 1.35)
+            font.family: root.contentFontFamily
+            font.pixelSize: Style.font.body
+            wrapMode: Text.WordWrap
+          }
+        }
+
+        Row {
+          width: parent.width
+          visible: root.boolSetting("showAppMenu", true)
+          spacing: Style.space(14)
+
+          Text {
+            width: (parent.width - parent.spacing) / 2
+            text: "3-finger  ↑"
+            color: root.contentForeground
+            font.family: root.contentFontFamily
+            font.pixelSize: Style.font.body
+            font.bold: true
+            elide: Text.ElideRight
+          }
+
+          Text {
+            width: (parent.width - parent.spacing) / 2
+            text: "App menu"
             color: Qt.darker(root.contentForeground, 1.35)
             font.family: root.contentFontFamily
             font.pixelSize: Style.font.body
@@ -209,7 +274,7 @@ Panel {
       // ---- Edit rows (customize mode) ----------------------------------
       Column {
         visible: root.editMode
-        width: contentColumn.width
+        width: parent.width
         spacing: Style.space(8)
 
         Text {
@@ -221,22 +286,52 @@ Panel {
           wrapMode: Text.WordWrap
         }
 
-        Repeater {
-          model: root.gestures
+        Toggle {
+          width: parent.width
+          label: "4-finger  ←  →"
+          description: "Switch workspace"
+          checked: root.boolSetting("showWorkspaceSwitch", true)
+          rounded: Style.cornerRadius > 0
+          foreground: root.contentForeground
+          accent: Color.accent
+          fontFamily: root.contentFontFamily
+          onClicked: root.persistSettings({ showWorkspaceSwitch: root.toggleValue("showWorkspaceSwitch") })
+        }
 
-          Toggle {
-            required property var modelData
-            width: parent.width
-            label: modelData.gesture
-            description: modelData.action
-            checked: root.gestureVisible(modelData)
-            rounded: Style.cornerRadius > 0
-            foreground: root.contentForeground
-            accent: Color.accent
-            fontFamily: root.contentFontFamily
+        Toggle {
+          width: parent.width
+          label: "4-finger  ↓  ↑"
+          description: "Minimize all / restore"
+          checked: root.boolSetting("showMinimizeAll", true)
+          rounded: Style.cornerRadius > 0
+          foreground: root.contentForeground
+          accent: Color.accent
+          fontFamily: root.contentFontFamily
+          onClicked: root.persistSettings({ showMinimizeAll: root.toggleValue("showMinimizeAll") })
+        }
 
-            onClicked: root.toggleGesture(modelData)
-          }
+        Toggle {
+          width: parent.width
+          label: "3-finger  ←  →"
+          description: "Cycle windows (Alt-Tab)"
+          checked: root.boolSetting("showCycleWindows", true)
+          rounded: Style.cornerRadius > 0
+          foreground: root.contentForeground
+          accent: Color.accent
+          fontFamily: root.contentFontFamily
+          onClicked: root.persistSettings({ showCycleWindows: root.toggleValue("showCycleWindows") })
+        }
+
+        Toggle {
+          width: parent.width
+          label: "3-finger  ↑"
+          description: "App menu"
+          checked: root.boolSetting("showAppMenu", true)
+          rounded: Style.cornerRadius > 0
+          foreground: root.contentForeground
+          accent: Color.accent
+          fontFamily: root.contentFontFamily
+          onClicked: root.persistSettings({ showAppMenu: root.toggleValue("showAppMenu") })
         }
 
         Toggle {
@@ -248,7 +343,6 @@ Panel {
           foreground: root.contentForeground
           accent: Color.accent
           fontFamily: root.contentFontFamily
-
           onClicked: root.persistSettings({ showInstallSection: !root.showInstallSection })
         }
 
@@ -312,6 +406,7 @@ Panel {
       // ---- Install footer (normal mode only) ---------------------------
       Column {
         visible: !root.editMode && root.showInstallSection
+        width: parent.width
         spacing: Style.space(10)
 
         PanelSeparator {
