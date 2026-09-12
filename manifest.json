@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "id": "io.github.mittai17.gesture-cheatsheet",
   "name": "Gesture Cheatsheet",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "mittai17",
-  "description": "Bar button with a panel cheat sheet for the omarchy-gestures Windows-style touchpad gestures, with one-click links to the source repo and install command.",
+  "description": "Bar button with a customizable cheat sheet for the omarchy-gestures Windows-style touchpad gestures — show/hide each gesture, the install section, and the bar label.",
   "kinds": [
     "bar-widget"
   ],
@@ -13,7 +13,7 @@
   },
   "barWidget": {
     "displayName": "Gesture Cheatsheet",
-    "description": "Quick reference for omarchy-gestures Windows-style touchpad gestures",
+    "description": "Customizable quick reference for omarchy-gestures Windows-style touchpad gestures",
     "category": "Utility",
     "defaultSection": "right",
     "allowMultiple": false

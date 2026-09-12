@@ -74,7 +74,7 @@ BarWidget {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: "Gestures"
+    text: root.setting("barLabel", "Gestures")
     horizontalMargin: 8.75
     verticalPadding: 8.75
     tooltipText: "Touchpad gesture cheat sheet"
