@@ -55,15 +55,12 @@ BarWidget {
   Row {
     id: iconRow
     anchors.verticalCenter: parent.verticalCenter
-    spacing: Style.space(4)
 
     Rectangle {
       width: root.iconSize
       height: root.iconSize
       radius: Style.cornerRadius
       clip: true
-      border.width: Style.spacing.hairline
-      border.color: Style.normalBorderFor(root.foreground, Color.accent)
 
       Image {
         anchors.fill: parent
@@ -71,14 +68,6 @@ BarWidget {
         fillMode: Image.PreserveAspectCrop
         smooth: true
       }
-    }
-
-    Text {
-      text: root.setting("barLabel", "Gestures")
-      color: root.foreground
-      font.family: root.fontFamily
-      font.pixelSize: Style.font.body
-      anchors.verticalCenter: parent.verticalCenter
     }
   }
 
