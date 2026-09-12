@@ -26,7 +26,7 @@ BarWidget {
 
   readonly property color foreground: bar ? bar.barForeground : Color.foreground
   readonly property string fontFamily: bar ? bar.fontFamily : Style.font.family
-  readonly property real iconSize: Math.max(12, barSize - 6)
+  property real iconSize: Math.max(14, barSize - 8)
 
   implicitWidth: iconRow.implicitWidth
   implicitHeight: bar ? bar.barSize : Style.bar.sizeHorizontal

@@ -18,13 +18,9 @@ Panel {
 
   property var anchorItem: null
 
-  // The bar tracks the widget mounted in its slot — BarWidget.qml — not this
-  // nested panel, so the popout coordinator has to compare against the host
-  // widget. Mirrors the built-in clock's panel contract.
   property var hostWidget: null
   readonly property var barIdentity: hostWidget || root
 
-  // Guarded so the panel renders before the bar is injected.
   readonly property color contentForeground: bar ? bar.foreground : Color.foreground
   readonly property string contentFontFamily: bar ? bar.fontFamily : Style.font.family
 
@@ -32,12 +28,8 @@ Panel {
   readonly property string installCommand: "git clone " + root.repoUrl + " && cd omarchy-gestures && ./install.sh"
   property bool copied: false
 
-  // Customization mode: flips the static list into per-row toggles. Transient
-  // (not persisted) — it is an editing mode, not a preference.
   property bool editMode: false
 
-  // The gestures the omarchy-gestures config actually wires up. Each one maps
-  // to a persisted show/hide setting keyed by `key`.
   readonly property var gestures: [
     { key: "showWorkspaceSwitch", gesture: "4-finger  ←  →", action: "Switch workspace" },
     { key: "showMinimizeAll", gesture: "4-finger  ↓  ↑", action: "Minimize all / restore" },
@@ -60,8 +52,6 @@ Panel {
     return root.boolSetting(g.key, true)
   }
 
-  // Mirrors the built-in clock's persistence: apply locally first, then write
-  // the whole entry back through the bar so shell.json keeps the same value.
   function persistSettings(values) {
     var entry = { id: root.moduleName }
     for (var existing in root.settings) if (existing !== "id") entry[existing] = root.settings[existing]
@@ -189,139 +179,131 @@ Panel {
         model: root.gestures
         visible: !root.editMode
 
-        Item {
+        Row {
           required property var modelData
-          width: parent.width
+          width: contentColumn.width
           visible: root.gestureVisible(modelData)
+          spacing: Style.space(14)
 
-          Row {
-            width: parent.width
-            spacing: Style.space(14)
+          Text {
+            width: (contentColumn.width - parent.spacing) / 2
+            text: modelData.gesture
+            color: root.contentForeground
+            font.family: root.contentFontFamily
+            font.pixelSize: Style.font.body
+            font.bold: true
+            elide: Text.ElideRight
+          }
 
-            Text {
-              width: (parent.width - parent.spacing) / 2
-              text: modelData.gesture
-              color: root.contentForeground
-              font.family: root.contentFontFamily
-              font.pixelSize: Style.font.body
-              font.bold: true
-              elide: Text.ElideRight
-            }
-
-            Text {
-              width: (parent.width - parent.spacing) / 2
-              text: modelData.action
-              color: Qt.darker(root.contentForeground, 1.35)
-              font.family: root.contentFontFamily
-              font.pixelSize: Style.font.body
-              wrapMode: Text.WordWrap
-            }
+          Text {
+            width: (contentColumn.width - parent.spacing) / 2
+            text: modelData.action
+            color: Qt.darker(root.contentForeground, 1.35)
+            font.family: root.contentFontFamily
+            font.pixelSize: Style.font.body
+            wrapMode: Text.WordWrap
           }
         }
       }
 
       // ---- Edit rows (customize mode) ----------------------------------
-      Item {
+      Column {
         visible: root.editMode
-        width: parent.width
+        width: contentColumn.width
+        spacing: Style.space(8)
 
-        Column {
+        Text {
           width: parent.width
-          spacing: Style.space(8)
+          text: "Show / hide each gesture. Settings are stored in the widget's shell.json entry."
+          color: Qt.darker(root.contentForeground, 1.35)
+          font.family: root.contentFontFamily
+          font.pixelSize: Style.font.caption
+          wrapMode: Text.WordWrap
+        }
 
-          Text {
-            width: parent.width
-            text: "Show / hide each gesture. Settings are stored in the widget's shell.json entry."
-            color: Qt.darker(root.contentForeground, 1.35)
-            font.family: root.contentFontFamily
-            font.pixelSize: Style.font.caption
-            wrapMode: Text.WordWrap
-          }
-
-          Repeater {
-            model: root.gestures
-
-            Toggle {
-              required property var modelData
-              width: parent.width
-              label: modelData.gesture
-              description: modelData.action
-              checked: root.gestureVisible(modelData)
-              rounded: Style.cornerRadius > 0
-              foreground: root.contentForeground
-              accent: Color.accent
-              fontFamily: root.contentFontFamily
-
-              onClicked: root.toggleGesture(modelData)
-            }
-          }
+        Repeater {
+          model: root.gestures
 
           Toggle {
+            required property var modelData
             width: parent.width
-            label: "Install section"
-            description: "Repo link, install command, and copy button at the bottom"
-            checked: root.showInstallSection
+            label: modelData.gesture
+            description: modelData.action
+            checked: root.gestureVisible(modelData)
             rounded: Style.cornerRadius > 0
             foreground: root.contentForeground
             accent: Color.accent
             fontFamily: root.contentFontFamily
 
-            onClicked: root.persistSettings({ showInstallSection: !root.showInstallSection })
+            onClicked: root.toggleGesture(modelData)
           }
+        }
 
-          PanelSeparator {
-            width: parent.width
-            foreground: root.contentForeground
-          }
+        Toggle {
+          width: parent.width
+          label: "Install section"
+          description: "Repo link, install command, and copy button at the bottom"
+          checked: root.showInstallSection
+          rounded: Style.cornerRadius > 0
+          foreground: root.contentForeground
+          accent: Color.accent
+          fontFamily: root.contentFontFamily
 
-          Text {
-            width: parent.width
-            text: "Bar label"
-            color: Qt.darker(root.contentForeground, 1.4)
-            font.family: root.contentFontFamily
-            font.pixelSize: Style.font.caption
-            font.bold: true
-          }
+          onClicked: root.persistSettings({ showInstallSection: !root.showInstallSection })
+        }
 
-          TextField {
-            id: labelField
-            width: parent.width
-            text: root.barLabel
-            foreground: root.contentForeground
-            accent: Color.accent
-            onAccepted: root.commitBarLabel()
-            onEditingFinished: root.commitBarLabel()
-          }
+        PanelSeparator {
+          width: parent.width
+          foreground: root.contentForeground
+        }
 
-          Row {
-            spacing: Style.space(8)
+        Text {
+          width: parent.width
+          text: "Bar label"
+          color: Qt.darker(root.contentForeground, 1.4)
+          font.family: root.contentFontFamily
+          font.pixelSize: Style.font.caption
+          font.bold: true
+        }
 
-            Rectangle {
-              implicitWidth: resetText.implicitWidth + Style.space(24)
-              implicitHeight: Style.spacing.controlHeight
-              radius: Style.cornerRadius
-              color: resetArea.containsMouse
-                ? Style.hoverFillFor(root.contentForeground, Color.accent)
-                : "transparent"
-              border.width: Style.spacing.hairline
-              border.color: Style.normalBorderFor(root.contentForeground, Color.accent)
+        TextField {
+          id: labelField
+          width: parent.width
+          text: root.barLabel
+          foreground: root.contentForeground
+          accent: Color.accent
+          onAccepted: root.commitBarLabel()
+          onEditingFinished: root.commitBarLabel()
+        }
 
-              Text {
-                id: resetText
-                anchors.centerIn: parent
-                text: "Reset to defaults"
-                color: root.contentForeground
-                font.family: root.contentFontFamily
-                font.pixelSize: Style.font.bodySmall
-              }
+        Row {
+          spacing: Style.space(8)
 
-              MouseArea {
-                id: resetArea
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.resetSettings()
-              }
+          Rectangle {
+            implicitWidth: resetText.implicitWidth + Style.space(24)
+            implicitHeight: Style.spacing.controlHeight
+            radius: Style.cornerRadius
+            color: resetArea.containsMouse
+              ? Style.hoverFillFor(root.contentForeground, Color.accent)
+              : "transparent"
+            border.width: Style.spacing.hairline
+            border.color: Style.normalBorderFor(root.contentForeground, Color.accent)
+
+            Text {
+              id: resetText
+              anchors.centerIn: parent
+              text: "Reset to defaults"
+              color: root.contentForeground
+              font.family: root.contentFontFamily
+              font.pixelSize: Style.font.bodySmall
+            }
+
+            MouseArea {
+              id: resetArea
+              anchors.fill: parent
+              hoverEnabled: true
+              cursorShape: Qt.PointingHandCursor
+              onClicked: root.resetSettings()
             }
           }
         }
@@ -330,7 +312,6 @@ Panel {
       // ---- Install footer (normal mode only) ---------------------------
       Column {
         visible: !root.editMode && root.showInstallSection
-        width: parent.width
         spacing: Style.space(10)
 
         PanelSeparator {
