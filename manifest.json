@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.mittai17.gesture-cheatsheet",
+  "name": "Gesture Cheatsheet",
+  "version": "1.0.0",
+  "author": "mittai17",
+  "description": "Bar button with a panel cheat sheet for the omarchy-gestures Windows-style touchpad gestures, with one-click links to the source repo and install command.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Gesture Cheatsheet",
+    "description": "Quick reference for omarchy-gestures Windows-style touchpad gestures",
+    "category": "Utility",
+    "defaultSection": "right",
+    "allowMultiple": false
+  }
+}
