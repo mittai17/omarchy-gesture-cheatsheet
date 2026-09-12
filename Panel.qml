@@ -1,3 +1,4 @@
+import Quickshell
 import QtQuick
 import Quickshell.Io
 import qs.Commons
@@ -26,6 +27,22 @@ Panel {
 
   readonly property string repoUrl: "https://github.com/mittai17/omarchy-gestures"
   readonly property string installCommand: "git clone " + root.repoUrl + " && cd omarchy-gestures && ./install.sh"
+
+  readonly property string openRepoBinary: "/usr/bin/xdg-open"
+  readonly property string copyBinary: "/usr/bin/wl-copy"
+  readonly property int processTimeoutMs: 5000
+
+  readonly property var minimalEnvironment: ({
+    "HOME": Quickshell.env("HOME"),
+    "PATH": "/usr/bin:/bin",
+    "WAYLAND_DISPLAY": Quickshell.env("WAYLAND_DISPLAY"),
+    "DISPLAY": Quickshell.env("DISPLAY"),
+    "XDG_RUNTIME_DIR": Quickshell.env("XDG_RUNTIME_DIR"),
+    "XDG_SESSION_TYPE": Quickshell.env("XDG_SESSION_TYPE"),
+    "XDG_CURRENT_DESKTOP": Quickshell.env("XDG_CURRENT_DESKTOP"),
+    "DBUS_SESSION_BUS_ADDRESS": Quickshell.env("DBUS_SESSION_BUS_ADDRESS")
+  })
+
   property bool copied: false
 
   property bool editMode: false
@@ -73,23 +90,43 @@ Panel {
   }
 
   function openRepo() {
-    repoProc.command = ["xdg-open", root.repoUrl]
+    repoProc.command = [root.openRepoBinary, root.repoUrl]
     repoProc.running = true
+    repoProcTimer.restart()
   }
 
   function copyInstall() {
-    copyProc.command = ["wl-copy", root.installCommand]
+    copyProc.command = [root.copyBinary, root.installCommand]
     copyProc.running = true
+    copyProcTimer.restart()
     root.copied = true
     copiedTimer.restart()
   }
 
   Process {
     id: repoProc
+    clearEnvironment: true
+    environment: root.minimalEnvironment
+    onExited: repoProcTimer.stop()
   }
 
   Process {
     id: copyProc
+    clearEnvironment: true
+    environment: root.minimalEnvironment
+    onExited: copyProcTimer.stop()
+  }
+
+  Timer {
+    id: repoProcTimer
+    interval: root.processTimeoutMs
+    onTriggered: repoProc.signal(15)
+  }
+
+  Timer {
+    id: copyProcTimer
+    interval: root.processTimeoutMs
+    onTriggered: copyProc.signal(15)
   }
 
   Timer {
