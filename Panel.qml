@@ -140,24 +140,6 @@ Panel {
       width: parent.width
       spacing: Style.space(10)
 
-      // ---- Logo --------------------------------------------------------
-      Rectangle {
-        width: Math.min(parent.width * 0.55, Style.space(120))
-        height: width
-        anchors.horizontalCenter: parent.horizontalCenter
-        radius: Style.cornerRadius
-        border.width: Style.spacing.hairline
-        border.color: Style.normalBorderFor(root.contentForeground, Color.accent)
-        clip: true
-
-        Image {
-          anchors.fill: parent
-          source: Qt.resolvedUrl("preview.png")
-          fillMode: Image.PreserveAspectCrop
-          smooth: true
-        }
-      }
-
       // ---- Header: section title + Customize/Done toggle ---------------
       Row {
         width: parent.width

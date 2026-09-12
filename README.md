@@ -53,8 +53,9 @@ Settings keys (in case you want to edit `shell.json` by hand):
 omarchy plugin add https://github.com/mittai17/omarchy-gesture-cheatsheet.git --enable
 ```
 
-Left click the **Gestures** button in the bar to open the panel; Escape or
-clicking elsewhere closes it. You can also summon it with:
+Left click the **Gestures** button (trackpad logo icon + label) in the bar to
+open the panel; Escape or clicking elsewhere closes it. You can also summon it
+with:
 
 ```sh
 omarchy-shell shell summon io.github.mittai17.gesture-cheatsheet '{}'
