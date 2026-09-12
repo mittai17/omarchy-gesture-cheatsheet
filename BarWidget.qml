@@ -31,7 +31,7 @@ BarWidget {
   implicitWidth: iconRow.implicitWidth
   implicitHeight: bar ? bar.barSize : Style.bar.sizeHorizontal
 
-  onBarChanged: injectPanel()
+  onBarChanged: { injectPanel(); syncClickRegistration() }
   onSettingsChanged: injectPanel()
 
   Loader {
@@ -90,7 +90,6 @@ BarWidget {
     if (registeredBar && registeredBar.registerClickTarget) registeredBar.registerClickTarget(root)
   }
 
-  onBarChanged: syncClickRegistration()
   Component.onCompleted: syncClickRegistration()
   Component.onDestruction: { if (registeredBar && registeredBar.unregisterClickTarget) registeredBar.unregisterClickTarget(root) }
 
